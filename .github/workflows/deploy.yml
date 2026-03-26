@@ -113,7 +113,11 @@ jobs:
 
       - name: Get JAR filename
         id: jar
-        run: echo "jar_path=$(ls target/*.jar | grep -v original | head -1)" >> $GITHUB_OUTPUT
+        run: |
+          JAR_FILE=$(ls target/*.jar | grep -v original | head -1)
+          echo "jar_path=$JAR_FILE" >> $GITHUB_OUTPUT
+          echo "Found JAR file: $JAR_FILE"
+          ls -lh $JAR_FILE
 
       - name: Create GitHub Release & Upload JAR
         uses: softprops/action-gh-release@v2
@@ -124,7 +128,11 @@ jobs:
             Automated release from push to main
             - Commit: ${{ github.sha }}
             - Triggered by: ${{ github.actor }}
+            - Tests Passed: All tests passing
           files: ${{ steps.jar.outputs.jar_path }}
+          draft: false
+          prerelease: false
+          make_latest: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
