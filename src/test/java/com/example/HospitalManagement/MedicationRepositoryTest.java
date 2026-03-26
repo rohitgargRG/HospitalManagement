@@ -13,9 +13,6 @@ import com.example.HospitalManagement.Repository.MedicationRepository;
 @SpringBootTest
 @ActiveProfiles("test")
 class MedicationRepositoryTest {
-
-    // repository tests
-
     @Autowired
     private MedicationRepository repository;
 
