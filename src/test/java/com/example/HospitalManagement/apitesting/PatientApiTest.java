@@ -1,5 +1,6 @@
 package com.example.HospitalManagement.apitesting;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.example.HospitalManagement.Entity.Physician;
 import com.example.HospitalManagement.Repository.PhysicianRepository;
 
+import jakarta.transaction.Transactional;
+
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -18,6 +21,7 @@ import org.springframework.http.MediaType;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@Transactional
 public class PatientApiTest {
 
     @Autowired
@@ -35,6 +39,11 @@ public class PatientApiTest {
         pcp.setSsn(888888888);
         physicianRepository.save(pcp);
     }
+
+    // @AfterEach
+    // void deletePhysician(){
+    //     physicianRepository.deleteById(100);
+    // }
 
     //pagination test
     @Test
@@ -97,7 +106,7 @@ public class PatientApiTest {
         "address": "Pune",
         "phone": "9999999999",
         "insuranceID": 12345,
-        "pcp": "http://localhost:9090/allPhysician/999"
+        "pcp": "http://localhost:9090/allPhysician/100"
     }
     """;
 
