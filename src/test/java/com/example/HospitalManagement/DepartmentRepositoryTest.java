@@ -68,7 +68,7 @@ public class DepartmentRepositoryTest {
     @Test
     void testFindByName_Pagination() {
         // 1. Setup
-        Physician doc = createTestPhysician(1003, "Dr. Gamma", 10003333);
+        Physician doc = createTestPhysician(603, "Dr. Gamma", 10003333);
         
         // Use a highly unique name to avoid reading existing DB records
         String searchName = "Special_Cardiology_Unit_X";
