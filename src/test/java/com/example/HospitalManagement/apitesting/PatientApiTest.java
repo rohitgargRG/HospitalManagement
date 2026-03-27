@@ -101,7 +101,7 @@ public class PatientApiTest {
 
     String invalidJson = """
     {
-        "ssn": "123",
+        "ssn": "AB123",
         "name": "",
         "address": "Pune",
         "phone": "9999999999",
