@@ -1,14 +1,20 @@
 package com.example.HospitalManagement.apitesting;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.hamcrest.Matchers.emptyString;
+import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-
+import org.springframework.dao.DataIntegrityViolationException;
 import com.example.HospitalManagement.Entity.Procedure;
 import com.example.HospitalManagement.Repository.ProcedureRepository;
 
@@ -35,6 +41,87 @@ public class ProcedureApiTest {
             .andExpect(status().isOk());
 }
 
+@Test
+void testAddProcedure_Success() throws Exception {
 
+    String json = """
+        {
+          "code": 1001,
+          "name": "MRI",
+          "cost": 3000
+        }
+        """;
+
+    mockMvc.perform(post("/procedures")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(json))
+            .andExpect(status().isCreated())
+            .andExpect(header().exists("Location"));
+}
+
+@Test
+void testAddProcedure_InvalidInput_ShouldThrowException() throws Exception {
+
+    String json = """
+        {
+          "code": 1003,
+          "name": null,
+          "cost": null
+        }
+        """;
+
+
+        mockMvc.perform(post("/procedures")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json))
+                .andReturn();
+
+
+}
+
+@Test
+void testUpdateProcedureCost_Success() throws Exception {
+
+    String createJson = """
+        {
+          "code": 3001,
+          "name": "X-Ray",
+          "cost": 2000
+        }
+        """;
+
+    mockMvc.perform(post("/procedures")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(createJson))
+            .andExpect(status().isCreated());
+
+    String updateJson = """
+        {
+          "cost": 4000
+        }
+        """;
+
+    mockMvc.perform(patch("/procedures/3001")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(updateJson))
+            .andExpect(status().isNoContent());
+
+    mockMvc.perform(get("/procedures/3001"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.cost").value(4000.0));
+}
+
+@Test
+void testUpdateProcedureCost_ResourceNotFoundAndInvalidInput() throws Exception{
+        String updateJson = """
+        {
+          "cost": 4000
+        }
+        """;
+        mockMvc.perform(patch("/procedures/100")
+        .contentType(MediaType.APPLICATION_JSON)
+        .content(updateJson))
+        .andReturn();
+}
 
 }
