@@ -74,7 +74,7 @@ public class PhysicianRestTest {
     }
 
     // --- NEW TEST: Verifying your Custom Paginated Search API ---
-  @Test
+    @Test
     void testSearchByPosition_Pagination() throws Exception {
         // Use a highly unique position so we don't accidentally count real doctors!
         String uniquePosition = "Astro_Cardiologist";
