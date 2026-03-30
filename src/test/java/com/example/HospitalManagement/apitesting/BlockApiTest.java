@@ -2,7 +2,7 @@ package com.example.HospitalManagement.apitesting;
 
 import com.example.HospitalManagement.Entity.BlockId;
 import com.example.HospitalManagement.Repository.BlockRepository;
-import com.example.HospitalManagement.Repository.RoomRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,12 +28,13 @@ public class BlockApiTest {
     @Autowired
     private BlockRepository blockRepository;
 
-    @Autowired
-    private RoomRepository roomRepository;
-
     @BeforeEach
-    void cleanDatabase() {
-        roomRepository.deleteAll();
+    void setUp() {
+        blockRepository.deleteAll();
+    }
+
+    @AfterEach
+    void tearDown() {
         blockRepository.deleteAll();
     }
 
