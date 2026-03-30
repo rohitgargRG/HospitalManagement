@@ -1,6 +1,12 @@
 package com.example.HospitalManagement.apitesting;
+import com.example.HospitalManagement.Entity.Appointment;
 import com.example.HospitalManagement.Entity.Nurse;
+import com.example.HospitalManagement.Entity.Patient;
+import com.example.HospitalManagement.Entity.Physician;
+import com.example.HospitalManagement.Repository.AppointmentRepository;
 import com.example.HospitalManagement.Repository.NurseRepository;
+import com.example.HospitalManagement.Repository.PatientRepository;
+import com.example.HospitalManagement.Repository.PhysicianRepository;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Date;
 import java.util.List;
 
 
@@ -26,6 +33,15 @@ public class NurseApiTest {
 
     @Autowired
     private NurseRepository nurseRepository;
+
+    @Autowired
+    private AppointmentRepository appointmentRepository;
+
+    @Autowired
+    private PatientRepository patientRepository;
+
+    @Autowired
+    private PhysicianRepository physicianRepository;
 
     private Nurse nurse1;
     private Nurse nurse2;
@@ -256,5 +272,132 @@ public class NurseApiTest {
                         .contentType("application/json")
                         .content(json))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @Transactional
+    @Rollback
+    void testGetAppointment_ByNurse_Success() throws Exception {
+
+        Physician physician = new Physician();
+        physician.setEmployeeId(900);
+        physician.setName("Dr. Test");
+        physician.setPosition("Doctor");
+        physician.setSsn(11111);
+        physicianRepository.saveAndFlush(physician);
+
+        Nurse nurse = new Nurse(1001, "Test Nurse", "Nurse", true, 12345);
+        nurseRepository.saveAndFlush(nurse);
+
+        Patient patient = new Patient();
+        patient.setSsn(10000050);
+        patient.setName("David Test");
+        patient.setAddress("Pune");
+        patient.setPhone("9999999999");
+        patient.setInsuranceID(12345);
+        patient.setPcp(physician);
+        patientRepository.saveAndFlush(patient);
+
+        Appointment appointment = new Appointment();
+        appointment.setAppointmentId(5001);
+        appointment.setPrepNurse(nurse);
+        appointment.setPatient(patient);
+        appointment.setPhysician(physician);
+        appointment.setExaminationRoom("Room A");
+        appointment.setStarto(new Date());
+        appointment.setEndo(new Date());
+
+        appointmentRepository.saveAndFlush(appointment);
+
+        mockMvc.perform(get("/appointments/search/byNurse")
+                        .param("nurse", "http://localhost/nurse/1001")
+                        .param("projection", "appointmentView"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$._embedded.appointments").isNotEmpty())
+                .andExpect(jsonPath("$._embedded.appointments[0].patient.name").value("David Test"))
+                .andExpect(jsonPath("$._embedded.appointments[0].examinationRoom").value("Room A"));
+    }
+
+    @Test
+    @Transactional
+    @Rollback
+    void testGetAppointment_ByNurse_Empty() throws Exception {
+
+        Nurse nurse = new Nurse(1002, "No Appointment Nurse", "Nurse", true, 22222);
+        nurseRepository.saveAndFlush(nurse);
+
+        mockMvc.perform(get("/appointments/search/byNurse")
+                        .param("nurse", "http://localhost/nurse/1002")
+                        .param("projection", "appointmentView"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$._embedded.appointments").isEmpty());
+    }
+
+    @Test
+    void testGetAppointment_InvalidNurse() throws Exception {
+
+        mockMvc.perform(get("/appointments/search/byNurse")
+                        .param("nurse", "http://localhost/nurse/9999")
+                        .param("projection", "appointmentView"))
+                .andExpect(status().isOk()); // returns empty
+    }
+
+    @Test
+    void testGetAppointment_MissingParam() throws Exception {
+
+        mockMvc.perform(get("/appointments/search/byNurse"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$._embedded.appointments").isEmpty());
+    }
+
+    @Test
+    @Transactional
+    @Rollback
+    void testGetAppointment_MultipleResults() throws Exception {
+
+        Physician physician = new Physician();
+        physician.setEmployeeId(901);
+        physician.setName("Dr. Multi");
+        physician.setPosition("Doctor");
+        physician.setSsn(22222);
+        physicianRepository.saveAndFlush(physician);
+
+        Nurse nurse = new Nurse(1003, "Multi Nurse", "Nurse", true, 33333);
+        nurseRepository.saveAndFlush(nurse);
+        Patient patient = new Patient();
+        patient.setSsn(10000060);
+        patient.setName("Multi Patient");
+        patient.setAddress("Nagpur");
+        patient.setPhone("8888888888");
+        patient.setInsuranceID(22222);
+        patient.setPcp(physician);
+        patientRepository.saveAndFlush(patient);
+
+        Appointment a1 = new Appointment();
+        a1.setAppointmentId(6001);
+        a1.setPrepNurse(nurse);
+        a1.setPatient(patient);
+        a1.setPhysician(physician);
+        a1.setExaminationRoom("Room A");
+        a1.setStarto(new Date());
+        a1.setEndo(new Date());
+
+        Appointment a2 = new Appointment();
+        a2.setAppointmentId(6002);
+        a2.setPrepNurse(nurse);
+        a2.setPatient(patient);
+        a2.setPhysician(physician);
+        a2.setExaminationRoom("Room B");
+        a2.setStarto(new Date());
+        a2.setEndo(new Date());
+
+        appointmentRepository.save(a1);
+        appointmentRepository.save(a2);
+
+        mockMvc.perform(get("/appointments/search/byNurse")
+                        .param("nurse", "http://localhost/nurse/1003")
+                        .param("projection", "appointmentView"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$._embedded.appointments.length()").value(2));
     }
 }
