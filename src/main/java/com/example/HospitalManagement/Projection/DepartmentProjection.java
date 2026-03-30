@@ -4,6 +4,8 @@ package com.example.HospitalManagement.Projection;
 
 import com.example.HospitalManagement.Entity.Department;
 import com.example.HospitalManagement.Entity.Physician;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.rest.core.config.Projection;
 
 // The name "fullDepartment" is what we will use in the URL later!
@@ -16,5 +18,6 @@ public interface DepartmentProjection {
     
     // 2. THE MAGIC LINE: This tells Spring to embed the full Physician object 
     // instead of just returning a URL link!
-    Physician getHead(); 
+    @Value("#{target.head.name}")
+    String getHead(); 
 }

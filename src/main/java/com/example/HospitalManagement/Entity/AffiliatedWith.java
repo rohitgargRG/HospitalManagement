@@ -27,11 +27,11 @@ public class AffiliatedWith {
     @Column(name = "PrimaryAffiliation", nullable = false)
     private Boolean primaryAffiliation;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "Physician", referencedColumnName = "EmployeeID", insertable = false, updatable = false)
     private Physician physicianEntity;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "Department", referencedColumnName = "DepartmentID", insertable = false, updatable = false)
     private Department departmentEntity;
 }
