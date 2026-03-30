@@ -72,9 +72,9 @@ public class PatientRepositoryTest {
     @Test
     @Rollback
     void testSavePatient() {
-        // 2. Create a new Patient
+        // Use an SSN not already inserted in setUp (100001-100003) to avoid duplicate @Id in session
         Patient patient = new Patient();
-        patient.setSsn(100001);
+        patient.setSsn(100004);
         patient.setName("John Doe");
         patient.setAddress("123 Baker St");
         patient.setPhone("1234567890");
@@ -85,7 +85,7 @@ public class PatientRepositoryTest {
         Patient saved = patientRepository.save(patient);
 
         assertNotNull(saved);
-        assertEquals(100001, saved.getSsn());
+        assertEquals(100004, saved.getSsn());
         assertEquals("John Doe", saved.getName());
         assertEquals("Dr. House", saved.getPcp().getName());
     }
